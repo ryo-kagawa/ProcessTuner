@@ -7,10 +7,13 @@ on:
         description: Release Tag format is Semver, input "vX.Y.Z"
         required: true
         type: string
-      
+
+permissions:
+  contents: write
+
 jobs:
   build:
-    if: ${{ github.event.inputs.tag }} =~ ^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
+    if: github.event.inputs.tag =~ '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
@@ -24,8 +27,8 @@ jobs:
           Copy-Item "LICENSE" -Destination "build\LICENSE"
           go install github.com/google/go-licenses@latest
           go-licenses save ./... --force --save_path build/licenses
-          go build -o ./build/ProcessTuner.exe -ldflags "-s -w -X=github.com/ryo-kagawa/WallpaperChanger/subcommand.name=ProcessTuner.exe -X=github.com/ryo-kagawa/ProcessTuner/subcommand.version=${{ github.event.inputs.tag }}" -trimpath ./cmd/main
-          go build -o ./build/ProcessTuner-Settings.exe -ldflags "-s -w -X=github.com/ryo-kagawa/WallpaperChanger/subcommand.name=ProcessTuner-Settings.exe -X=github.com/ryo-kagawa/ProcessTuner/subcommand.version=${{ github.event.inputs.tag }}" -trimpath ./cmd/settings
+          go build -o ./build/ProcessTuner.exe -ldflags "-s -w -X=github.com/ryo-kagawa/ProcessTuner/subcommand.name=ProcessTuner.exe -X=github.com/ryo-kagawa/ProcessTuner/subcommand.version=${{ github.event.inputs.tag }}" -trimpath ./cmd/main
+          go build -o ./build/ProcessTuner-Settings.exe -ldflags "-s -w -X=github.com/ryo-kagawa/ProcessTuner/subcommand.name=ProcessTuner-Settings.exe -X=github.com/ryo-kagawa/ProcessTuner/subcommand.version=${{ github.event.inputs.tag }}" -trimpath ./cmd/settings
           Compress-Archive -Path build\* -Destination ProcessTuner_${{ github.event.inputs.tag }}.zip
         env:
           GOAMD64: v3
